@@ -21,5 +21,18 @@ Et lærerigt sigte-og-skyd-spil i en eventyrskov med 20 levels i plus, minus og 
 | 11–16 | Gange, fra 2-, 5- og 10-tabellen op til 9 × 9 |
 | 17–20 | Alt blandet |
 
+## Verdener i butikken
+Hvert farvetema er sin egen verden med egne ting, der bevæger sig:
+
+| Eventyrnat | Junglen | Havbund |
+|---|---|---|
+| ![](billeder/nat.png) | ![](billeder/jungle.png) | ![](billeder/hav.png) |
+| Slot, fyrreskov, ildfluer | Tempel, vandfald, palmer, lianer, sommerfugle | Sunket skib, koraller, tang, fisk, bobler |
+
+| Slikland | Rummet |
+|---|---|
+| ![](billeder/slik.png) | ![](billeder/rum.png) |
+| Peberkagehus, slikkepinde, krymmel | Ringplanet, raket, månekratere, stjerneskud |
+
 ## Kør spillet
 Åbn `index.html` i en browser. Der skal ikke installeres noget.
