@@ -60,9 +60,10 @@ h1 {
 button:focus-visible, canvas:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
 .stage {
   position: relative; align-self: center;
-  width: min(100%, calc((100dvh - 200px) * 1.6667)); min-width: 0;
+  width: min(100%, max(640px, calc((100vh - 200px) * 1.6667)));
   aspect-ratio: 1100 / 660; max-width: 100%;
 }
+#bgc { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-action: manipulation; box-shadow: 0 14px 40px rgba(0,0,0,.5); }
 .chips { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
 .chip {
@@ -115,6 +116,7 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
 </head>
 <body>
 
+<canvas id="bgc" aria-hidden="true"></canvas>
 <div class="app">
   <div class="bar">
     <h1>Gangetabel-kanonen</h1>
@@ -612,10 +614,28 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     c.fillStyle = "#1a1030"; c.beginPath(); c.arc(x, y + 10, 14, Math.PI, 0); c.fill();
   }
 
+  // ---------- page backdrop: the same fairy-tale forest, soft and dimmed behind the whole page ----------
+  const bgc = document.getElementById("bgc"), bctx = bgc.getContext("2d");
+  let bgKey = "";
+  function paintPageBg() {
+    const vw = window.innerWidth || 1280, vh = window.innerHeight || 800, dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const key = sceneKey + "|" + vw + "x" + vh;
+    if (key === bgKey || !scene.width) return;
+    bgKey = key;
+    bgc.width = Math.round(vw * dpr); bgc.height = Math.round(vh * dpr);
+    const s = Math.max(bgc.width / scene.width, bgc.height / scene.height) * 1.08;
+    const w = scene.width * s, h = scene.height * s;
+    bctx.setTransform(1, 0, 0, 1, 0, 0);
+    try { bctx.filter = "blur(5px) saturate(1.1)"; } catch (e) {}
+    bctx.drawImage(scene, (bgc.width - w) / 2, bgc.height - h, w, h);
+    try { bctx.filter = "none"; } catch (e) {}
+    bctx.fillStyle = "rgba(8,6,24,.35)"; bctx.fillRect(0, 0, bgc.width, bgc.height);
+  }
+
   // ---------- drawing ----------
   function resize() {
     const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(r.width * dpr) || W, h = Math.round(r.height * dpr) || H;
+    const w = Math.max(Math.round(r.width * dpr), 550), h = Math.max(Math.round(r.height * dpr), 330);
     if (w !== cv.width || h !== cv.height) { cv.width = w; cv.height = h; }
   }
   window.addEventListener("resize", resize);
@@ -867,6 +887,7 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
   function draw() {
     const th = cur("theme"), bl = cur("ball"), cn = cur("cannon");
     paintScene(th);
+    paintPageBg();
     zoom.z += (zoom.target - zoom.z) * .06;
     const sx = cv.width / W, sy = cv.height / H;
     ctx.setTransform(1, 0, 0, 1, 0, 0);

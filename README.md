@@ -1,5 +1,7 @@
 # Gangetabel-kanonen
 
+![Skærmbillede af spillet](screenshot.png)
+
 Et lærerigt sigte-og-skyd-spil til at øve gangetabellerne 2–10, sat i en eventyrskov.
 
 ## Sådan spiller man
