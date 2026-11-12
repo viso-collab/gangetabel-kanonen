@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gangetabel-kanonen</title>
+<title>Regnekanonen</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Cherry+Swash:wght@700&family=Nunito:wght@600;800&display=swap">
 <style>
-/* Layout: wide desktop game cabinet — top bar (title, table picker, purse, shop), one big 5:3 stage (owl panel + peg board), answer chips below. Single theme by choice; colors follow the equipped shop theme. */
+/* Layout: wide desktop game cabinet — top bar (title, purse, shop), level strip, one big 5:3 stage (owl panel + peg board), solved-problem chips below. Single theme by choice; colors follow the equipped shop theme. */
 :root {
   --bg: #120e2e;
   --bg-2: #2a2160;
@@ -26,7 +26,7 @@
 html, body { height: 100%; }
 [hidden] { display: none !important; }
 body {
-  background: radial-gradient(120% 90% at 50% 0%, var(--bg-2), var(--bg) 75%) fixed, var(--bg);
+  background: var(--bg);
   color: var(--fg);
   font-family: var(--font-body);
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -34,21 +34,23 @@ body {
   padding-block: 14px;
   box-sizing: border-box;
 }
-.app { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-.bar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+#bgc { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.app { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.bar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: space-between; }
 h1 {
-  font-family: var(--font-title); font-weight: 700; font-size: 2.1rem; line-height: 1; margin: 0;
+  font-family: var(--font-title); font-weight: 700; font-size: 2.2rem; line-height: 1; margin: 0;
   color: var(--yellow); text-shadow: 0 3px 0 #8a3a00, 0 0 18px rgba(255,210,63,.35); white-space: nowrap;
 }
-.picker { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; flex: 1; min-width: 0; }
-.picker > span { font-size: .85rem; color: var(--muted); margin-right: 4px; font-weight: 800; }
-.picker button {
-  font: 800 1.1rem var(--font-display); color: var(--fg); background: var(--panel);
-  border: 2px solid transparent; border-radius: 10px; width: 42px; height: 42px; cursor: pointer; position: relative;
+.levels { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.levels > span { font-size: .85rem; color: var(--fg); margin-right: 6px; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.levels button {
+  font: 800 1rem var(--font-display); color: var(--fg); background: var(--panel);
+  border: 2px solid transparent; border-radius: 10px; width: 40px; height: 40px; cursor: pointer; position: relative; padding: 0;
 }
-.picker button:hover { border-color: rgba(255,255,255,.35); }
-.picker button[aria-pressed="true"] { background: var(--pink); border-color: var(--yellow); }
-.picker button .st { position: absolute; bottom: -8px; left: 0; right: 0; font-size: .62rem; color: var(--yellow); letter-spacing: -1px; }
+.levels button:hover:not(:disabled) { border-color: rgba(255,255,255,.4); }
+.levels button[aria-pressed="true"] { background: var(--pink); border-color: var(--yellow); }
+.levels button:disabled { opacity: .38; cursor: not-allowed; }
+.levels button .st { position: absolute; bottom: -8px; left: 0; right: 0; font-size: .58rem; color: var(--yellow); letter-spacing: -1px; }
 .stats { display: flex; gap: 8px; align-items: stretch; }
 .stat { background: var(--panel); border-radius: 12px; padding: 4px 14px; text-align: center; min-width: 64px; }
 .stat b { display: block; font-family: var(--font-display); font-size: 1.35rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -61,24 +63,24 @@ h1 {
 button:focus-visible, canvas:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
 .stage {
   position: relative; align-self: center;
-  width: min(100%, max(640px, calc((100vh - 200px) * 1.6667)));
+  width: min(100%, max(640px, calc((100vh - 220px) * 1.6667)));
   aspect-ratio: 1100 / 660; max-width: 100%;
 }
-#bgc { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-action: manipulation; box-shadow: 0 14px 40px rgba(0,0,0,.5); }
-.chips { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+canvas#c { width: 100%; height: 100%; display: block; border-radius: 20px; touch-action: manipulation; box-shadow: 0 14px 40px rgba(0,0,0,.5); }
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .chip {
-  font-size: .9rem; font-weight: 800; text-align: center; padding: 6px 0; border-radius: 10px;
-  background: rgba(255,255,255,.07); color: var(--muted); font-variant-numeric: tabular-nums;
-  transition: background .25s, color .25s, transform .25s;
+  font: 800 1.05rem var(--font-display); text-align: center; padding: 6px 0; border-radius: 12px;
+  background: rgba(20,14,50,.7); color: var(--muted); font-variant-numeric: tabular-nums;
+  border: 2px solid transparent; transition: background .25s, color .25s;
 }
-.chip.on { background: var(--pink); color: var(--fg); transform: scale(1.05); }
+.chip.now { border-color: var(--yellow); color: var(--fg); }
+.chip.on { background: var(--pink); color: var(--fg); }
 .ov {
   position: absolute; inset: 0; border-radius: 20px; background: rgba(10,8,30,.82);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 24px;
 }
 .ov h2 { font-family: var(--font-title); font-size: 2.8rem; margin: 0; color: var(--yellow); text-wrap: balance; line-height: 1.1; }
-.ov p { margin: 0; color: var(--fg); max-width: 40ch; line-height: 1.5; font-size: 1.1rem; }
+.ov p { margin: 0; color: var(--fg); max-width: 42ch; line-height: 1.5; font-size: 1.1rem; }
 .ov .stars { font-size: 3rem; color: var(--yellow); letter-spacing: 6px; }
 .ov .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .ov button {
@@ -109,9 +111,9 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
 .item button.own { background: var(--bg-2); }
 .item button:disabled { background: rgba(255,255,255,.08); color: var(--muted); cursor: default; }
 .close { font: 800 1rem var(--font-display); border: 0; border-radius: 12px; padding: 8px 18px; cursor: pointer; background: var(--pink); color: var(--fg); }
-.help { font-size: .85rem; color: var(--muted); text-align: center; margin: 0; line-height: 1.5; }
-.mute { background: none; border: 0; color: var(--muted); font: inherit; cursor: pointer; text-decoration: underline; }
-@media (max-width: 700px) { .chips { grid-template-columns: repeat(5, 1fr); } h1 { font-size: 1.6rem; } }
+.help { font-size: .85rem; color: var(--fg); text-align: center; margin: 0; line-height: 1.5; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
+.mute { background: none; border: 0; color: var(--fg); font: inherit; cursor: pointer; text-decoration: underline; }
+@media (max-width: 700px) { h1 { font-size: 1.6rem; } .chip { font-size: .85rem; } }
 @media (prefers-reduced-motion: reduce) { .chip { transition: none; } }
 </style>
 </head>
@@ -120,41 +122,70 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
 <canvas id="bgc" aria-hidden="true"></canvas>
 <div class="app">
   <div class="bar">
-    <h1>Gangetabel-kanonen</h1>
-    <div class="picker" id="picker" role="group" aria-label="Vælg tabel"><span>Tabel</span></div>
+    <h1>Regnekanonen</h1>
     <div class="stats">
       <div class="stat"><b id="score">0</b><span>Point</span></div>
       <div class="stat coins"><b id="coins">0</b><span>Mønter</span></div>
       <button class="shopbtn" id="openShop">Butik</button>
     </div>
   </div>
+  <div class="levels" id="levels" role="group" aria-label="Vælg level"><span>Level</span></div>
   <div class="stage">
-    <canvas id="c" width="1100" height="660" aria-label="Spillebane med talkugler. Tryk på et tal for at skyde på det. Piletaster vælger et tal, Enter skyder, U bruger Uglesyn."></canvas>
+    <canvas id="c" width="1100" height="660" aria-label="Spillebane med svarkugler. Klik på kuglen med det rigtige svar. Piletaster vælger en kugle, Enter skyder, U bruger Uglesyn."></canvas>
     <div class="ov" id="ov" hidden></div>
     <div class="shop" id="shop" hidden></div>
   </div>
   <div class="chips" id="chips"></div>
-  <p class="help">Klik på et tal i tabellen, så skyder kanonen på det. Tre forkerte, og du starter forfra. Hver rigtig fylder uglens månekugle, og når den er fuld, kan du klikke på uglen. Rammer kuglen spanden, får du 25 bonusmønter. <button class="mute" id="mute">Lyd: til</button></p>
+  <p class="help">Klik på kuglen med det rigtige svar, så skyder kanonen på den. Tre forkerte, og du starter levelet forfra. Hver rigtig fylder uglens månekugle, og når den er fuld, kan du klikke på uglen. Rammer kuglen spanden, får du 25 bonusmønter. <button class="mute" id="mute">Lyd: til</button></p>
 </div>
 
 <script>
 (() => {
   const W = 1100, H = 660;
   const BX0 = 262, BX1 = 1088, CX = (BX0 + BX1) / 2, CY = 54;
-  const G = 1000, BALL_R = 10, PEG_R = 27, BUCKET_Y = 614, BUCKET_W = 100;
+  const G = 1000, BALL_R = 10, PEG_R = 36, BUCKET_Y = 614, BUCKET_W = 100;
   const OWL = { x: 128, y: 318 };
+  const POWER_MAX = 3;
   const cv = document.getElementById("c"), ctx = cv.getContext("2d");
   const $ = id => document.getElementById(id);
 
-  let table = 2, pegs = [], shot = null, fallers = [], streak = 0, mistakes = 0, score = 0;
-  let found = new Set(), particles = [], floats = [], phase = "play", angle = Math.PI / 2, time = 0;
+  // ---------- the 20 levels (fixed problems, shuffled order) ----------
+  const LEVELS = [
+    [[2, "+", 3], [4, "+", 1], [3, "+", 3]],
+    [[5, "+", 2], [6, "+", 3], [4, "+", 4]],
+    [[7, "+", 2], [8, "+", 1], [5, "+", 4]],
+    [[12, "+", 5], [23, "+", 4], [31, "+", 7]],
+    [[14, "+", 12], [25, "+", 13], [32, "+", 21]],
+    [[27, "+", 15], [38, "+", 24], [46, "+", 19]],
+    [[8, "-", 3], [9, "-", 5], [7, "-", 4]],
+    [[15, "-", 4], [18, "-", 7], [26, "-", 5]],
+    [[34, "-", 12], [47, "-", 23], [52, "-", 18]],
+    [[36, "+", 27], [64, "-", 29], [45, "+", 38]],
+    [[2, "×", 3], [5, "×", 2], [10, "×", 4]],
+    [[2, "×", 7], [5, "×", 6], [10, "×", 8]],
+    [[3, "×", 4], [4, "×", 5], [3, "×", 8]],
+    [[6, "×", 3], [4, "×", 7], [6, "×", 6]],
+    [[7, "×", 7], [8, "×", 6], [9, "×", 4]],
+    [[7, "×", 8], [9, "×", 6], [8, "×", 9]],
+    [[6, "×", 7], [72, "-", 35], [48, "+", 37]],
+    [[9, "×", 9], [83, "-", 47], [8, "×", 7]],
+    [[56, "+", 68], [91, "-", 46], [7, "×", 9]],
+    [[8, "×", 8], [125, "-", 48], [6, "×", 9]],
+  ];
+  const calc = (a, op, b) => op === "+" ? a + b : op === "-" ? a - b : a * b;
+  const sym = op => op === "-" ? "−" : op;
+  const ptext = p => `${p.a} ${sym(p.op)} ${p.b}`;
+  const NEW_OP = { 7: "Nu kommer minus! Når man trækker fra, bliver tallet mindre.", 11: "Nu kommer gange! 2 × 3 betyder 2 + 2 + 2.", 17: "Nu blander vi plus, minus og gange. Kig godt på tegnet!" };
+
+  let level = 1, probs = [], pi = 0, prob = null, solved = [];
+  let pegs = [], shot = null, fallers = [], streak = 0, mistakes = 0, score = 0;
+  let particles = [], floats = [], phase = "play", angle = Math.PI / 2, time = 0, betweenT = 0, signPop = 1;
   let timeScale = 1, zoom = { x: CX, y: H / 2, z: 1, target: 1 }, hover = -1, clearT = 0, clearQueue = [], fireworkT = 0;
-  let power = 0, owlHover = false;
-  const POWER_MAX = 4;
+  let power = 0;
   const owl = { mood: "idle", moodT: 0, blinkT: 2, hop: 0, lookX: 0, lookY: 0 };
   let speech = { text: "", t: 0 };
   let best = {};
-  try { best = JSON.parse(localStorage.getItem("gk-best") || "{}") || {}; } catch (e) { best = {}; }
+  try { best = JSON.parse(localStorage.getItem("gk-lv") || "{}") || {}; } catch (e) { best = {}; }
 
   // ---------- sound ----------
   let ac = null, soundOn = true;
@@ -194,8 +225,9 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
       guld:     { name: "Guld",     price: 400, barrel: "#fff1a8", base: "#e0a800" },
     } },
   };
-  let save = { coins: 0, owned: ["theme:nat", "ball:hvid", "cannon:klassisk"], eq: { theme: "nat", ball: "hvid", cannon: "klassisk" } };
-  try { const s = JSON.parse(localStorage.getItem("gk-save") || "null"); if (s && s.eq && Array.isArray(s.owned)) save = s; } catch (e) {}
+  let save = { coins: 0, owned: ["theme:nat", "ball:hvid", "cannon:klassisk"], eq: { theme: "nat", ball: "hvid", cannon: "klassisk" }, unlocked: 1 };
+  try { const s = JSON.parse(localStorage.getItem("gk-save") || "null"); if (s && s.eq && Array.isArray(s.owned)) save = Object.assign(save, s); } catch (e) {}
+  if (!(save.unlocked >= 1)) save.unlocked = 1;
   const persist = () => { try { localStorage.setItem("gk-save", JSON.stringify(save)); } catch (e) {} };
   const cur = cat => SHOP[cat].items[save.eq[cat]] || Object.values(SHOP[cat].items)[0];
   function addCoins(n) { save.coins += n; $("coins").textContent = save.coins; persist(); }
@@ -247,79 +279,83 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
   $("openShop").onclick = () => shopOpen ? closeShop() : openShop();
 
   // ---------- UI ----------
-  function renderPicker() {
-    const p = $("picker");
+  function renderLevels() {
+    const p = $("levels");
     p.querySelectorAll("button").forEach(b => b.remove());
-    for (let n = 2; n <= 10; n++) {
+    for (let n = 1; n <= LEVELS.length; n++) {
       const b = document.createElement("button");
-      b.setAttribute("aria-pressed", n === table ? "true" : "false");
+      b.setAttribute("aria-pressed", n === level ? "true" : "false");
+      b.disabled = n > save.unlocked;
+      b.title = b.disabled ? `Klar level ${n - 1} for at åbne` : `Level ${n}`;
       b.innerHTML = n + (best[n] ? `<span class="st">${"★".repeat(best[n])}</span>` : "");
-      b.onclick = () => { table = n; newLevel(); };
+      b.onclick = () => { if (n <= save.unlocked) startLevel(n); };
       p.appendChild(b);
     }
   }
   function renderChips() {
     const c = $("chips"); c.innerHTML = "";
-    for (let k = 1; k <= 10; k++) {
-      const v = table * k, d = document.createElement("div");
-      d.className = "chip" + (found.has(v) ? " on" : "");
-      d.textContent = `${table}×${k}=${found.has(v) ? v : "?"}`;
+    for (let k = 0; k < 3; k++) {
+      const d = document.createElement("div");
+      d.className = "chip" + (solved[k] ? " on" : k === pi ? " now" : "");
+      d.textContent = solved[k] || (k === pi && prob ? `${ptext(prob)} = ?` : `Regnestykke ${k + 1}`);
       c.appendChild(d);
     }
   }
   function renderStats() { $("score").textContent = score; }
 
   // ---------- owl talk ----------
-  const TIPS = {
-    2: "Alle tal i 2-tabellen er lige tal. De ender på 0, 2, 4, 6 eller 8.",
-    3: "Læg cifrene sammen. Giver det 3, 6 eller 9, er tallet i 3-tabellen.",
-    4: "Tallene i 4-tabellen kan halveres to gange uden at gå i stykker.",
-    5: "Tallene i 5-tabellen ender altid på 0 eller 5.",
-    6: "Tallene i 6-tabellen er lige tal, og de er også i 3-tabellen.",
-    7: "Tæl 7 frem ad gangen: 7, 14, 21, 28 ...",
-    8: "Tallene i 8-tabellen er lige. Tæl 8 frem: 8, 16, 24, 32 ...",
-    9: "Læg cifrene sammen. I 9-tabellen giver det altid 9.",
-    10: "Tallene i 10-tabellen ender altid på 0.",
-  };
-  const PRAISE = ["Hu-hu, rigtigt!", "Flot ramt!", "Du er klog som en ugle!", "Præcis!", "Sådan!", "Godt regnet!"];
+  const PRAISE = ["Hu-hu, rigtigt!", "Flot regnet!", "Du er klog som en ugle!", "Præcis!", "Sådan!", "Godt tænkt!"];
   function say(text, dur = 4.5) { speech = { text, t: dur }; }
   function mood(m, t = 1.2) { owl.mood = m; owl.moodT = t; if (m === "happy") owl.hop = 1; }
+  function hint(p) {
+    if (p.op === "+") return p.b <= 10 ? `Start ved ${p.a} og tæl ${p.b} frem.` : `Læg tierne sammen først, og så enerne.`;
+    if (p.op === "-") return p.b <= 10 ? `Start ved ${p.a} og tæl ${p.b} tilbage.` : `Træk tierne fra først, og så enerne.`;
+    return `${p.a} × ${p.b} er ${p.b} grupper med ${p.a} i hver. Tæl ${p.a} frem ${p.b} gange.`;
+  }
 
-  // ---------- level ----------
+  // ---------- levels & problems ----------
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const PATTERNS = [
-    () => { const p = []; // two waves
-      for (let i = 0; i < 8; i++) p.push([330 + i * 98, 250 - 60 * Math.sin(i / 7 * Math.PI)]);
-      for (let i = 0; i < 8; i++) p.push([330 + i * 98, 410 + 60 * Math.sin(i / 7 * Math.PI)]);
-      return p; },
-    () => { const p = []; // ring with inner ring
-      for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283 - 1.571; p.push([CX + Math.cos(a) * 250, 345 + Math.sin(a) * 175]); }
-      for (let i = 0; i < 6; i++) { const a = i / 6 * 6.283 - 1.571 + .52; p.push([CX + Math.cos(a) * 105, 345 + Math.sin(a) * 85]); }
-      return p; },
-    () => { const p = []; // staggered rows 6 / 4 / 6
-      for (let i = 0; i < 6; i++) p.push([375 + i * 120, 220]);
-      for (let i = 0; i < 4; i++) p.push([495 + i * 120, 335]);
-      for (let i = 0; i < 6; i++) p.push([375 + i * 120, 450]);
-      return p; },
-    () => { const p = []; // rainbow arch and smile
-      for (let i = 0; i < 9; i++) { const a = Math.PI + (i / 8) * Math.PI; p.push([CX + Math.cos(a) * 340, 340 + Math.sin(a) * 160]); }
-      for (let i = 0; i < 7; i++) { const a = (i / 6) * Math.PI; p.push([CX - Math.cos(a) * 210, 370 + Math.sin(a) * 130]); }
-      return p; },
-  ];
-  function newLevel() {
-    const targets = Array.from({ length: 10 }, (_, k) => table * (k + 1));
-    const pool = [];
-    for (let v = 1; v <= table * 10; v++) if (v % table) pool.push(v);
-    const decoys = shuffle(pool).slice(0, 6);
-    const nums = shuffle([...targets, ...decoys]);
-    const pos = PATTERNS[Math.random() * PATTERNS.length | 0]();
-    pegs = nums.map((v, i) => ({ x: pos[i][0], y: pos[i][1], v, ok: v % table === 0, alive: true, lit: false, litT: 0, shake: 0, wrong: 0, appear: -i * .04, reveal: false }));
-    shot = null; fallers = []; streak = 0; mistakes = 0; score = 0; found = new Set(); power = 0;
-    particles = []; floats = []; phase = "play"; timeScale = 1; zoom.target = 1; zoom.z = 1; hover = -1; clearQueue = [];
+  function distractors(p) {
+    const a = p.ans, out = new Set();
+    const c = [a + 1, a - 1, a + 2, a - 2, a + 3, a - 3];
+    if (a >= 10) c.push(a + 10, a - 10);
+    if (p.op === "×") c.push(p.a * (p.b + 1), p.a * (p.b - 1), (p.a + 1) * p.b, p.a + p.b);
+    if (p.op === "+") c.push(Math.abs(p.a - p.b));
+    if (p.op === "-") c.push(p.a + p.b);
+    for (const v of shuffle(c)) { if (out.size >= 4) break; if (v >= 0 && v !== a) out.add(v); }
+    let k = 4; while (out.size < 4) { const v = a + k++; if (v !== a) out.add(v); }
+    return [...out];
+  }
+  function scatter(n) {
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const pts = [];
+      for (let tries = 0; tries < 2000 && pts.length < n; tries++) {
+        const x = BX0 + 70 + Math.random() * (BX1 - BX0 - 140), y = 230 + Math.random() * 300;
+        if (pts.every(([px, py]) => Math.hypot(px - x, py - y) > 2 * PEG_R + 60)) pts.push([x, y]);
+      }
+      if (pts.length === n) return pts;
+    }
+    return Array.from({ length: n }, (_, i) => [BX0 + 110 + i * 150, 380]);
+  }
+  function startLevel(n) {
+    level = n;
+    probs = shuffle(LEVELS[n - 1].map(([a, op, b]) => ({ a, op, b, ans: calc(a, op, b) })));
+    pi = 0; solved = []; streak = 0; mistakes = 0; score = 0;
+    shot = null; fallers = []; particles = []; floats = []; timeScale = 1; zoom.target = 1; zoom.z = 1; hover = -1; clearQueue = [];
     $("ov").hidden = true;
-    say(`Hu-hu! Find alle 10 tal i ${table}-tabellen. ${TIPS[table]}`, 7);
+    spawnProblem();
+    say(NEW_OP[n] || (n === 1 ? "Hu-hu! Jeg er Professor Hu. Skyd kuglen med det rigtige svar på regnestykket!" : `Level ${n}! Tre regnestykker venter. Du kan godt!`), 6);
     mood("happy", .8);
-    renderPicker(); renderChips(); renderStats();
+    renderLevels(); renderStats();
+  }
+  function spawnProblem() {
+    prob = probs[pi];
+    signPop = 0;
+    const opts = shuffle([prob.ans, ...distractors(prob)]), pos = scatter(5);
+    pegs = opts.map((v, i) => ({ x: pos[i][0], y: pos[i][1], v, ok: v === prob.ans, alive: true, lit: false, litT: 0, shake: 0, wrong: 0, dying: 0, appear: -.35 - i * .09 }));
+    phase = "play";
+    renderChips();
+    tone(440, .12, "triangle", .12, 1.5);
   }
 
   // ---------- input ----------
@@ -327,42 +363,41 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     const r = cv.getBoundingClientRect();
     return [(ev.clientX - r.left) / r.width * W, (ev.clientY - r.top) / r.height * H];
   }
+  const clickable = p => p.alive && !p.lit && !p.dying && p.appear > 0;
   function pegAt(px, py) {
     let bi = -1, bd = PEG_R + 10;
-    pegs.forEach((p, i) => { if (p.alive && !p.lit) { const d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; bi = i; } } });
+    pegs.forEach((p, i) => { if (clickable(p)) { const d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; bi = i; } } });
     return bi;
   }
   const onOwl = (px, py) => Math.hypot(px - OWL.x, py - OWL.y) < 80;
   function fire(i) {
     const p = pegs[i];
-    if (phase !== "play" || shopOpen || !p || !p.alive || p.lit) return;
+    if (phase !== "play" || shopOpen || !p || !clickable(p)) return;
     phase = "fly";
     angle = Math.atan2(p.y - CY, p.x - CX);
-    const remaining = pegs.filter(q => q.ok && q.alive && !q.lit).length;
-    shot = { x: CX + Math.cos(angle) * 46, y: CY + Math.sin(angle) * 46, peg: p, trail: [], final: p.ok && remaining === 1 };
+    shot = { x: CX + Math.cos(angle) * 46, y: CY + Math.sin(angle) * 46, peg: p, trail: [], final: p.ok && pi === probs.length - 1 };
     if (shot.final) { timeScale = .3; zoom.x = p.x; zoom.y = p.y; zoom.target = 1.4; tone(200, 1.2, "sine", .12, 3); }
     tone(260, .15, "triangle", .18, 2.4);
     burst(CX + Math.cos(angle) * 50, CY + Math.sin(angle) * 50, "#ffffff", 8, 120);
   }
   function useOwlPower() {
-    if (phase !== "play" || power < POWER_MAX) {
-      if (phase === "play") say(`Ram ${POWER_MAX - power} rigtige mere, så er min månekugle fuld.`, 3);
-      return;
-    }
+    if (phase !== "play") return;
+    if (power < POWER_MAX) { say(`Svar rigtigt ${POWER_MAX - power} gang${POWER_MAX - power > 1 ? "e" : ""} mere, så er min månekugle fuld.`, 3); return; }
+    const wrongs = shuffle(pegs.filter(p => !p.ok && clickable(p))).slice(0, 2);
+    if (!wrongs.length) { say("Der er ikke flere forkerte svar at fjerne!", 3); return; }
     power = 0;
-    const hidden = shuffle(pegs.filter(p => p.ok && p.alive && !p.lit && !p.reveal)).slice(0, 2);
-    hidden.forEach(p => { p.reveal = true; burst(p.x, p.y, "#fff3a0", 24, 200); });
-    say(hidden.length ? "Uglesyn! Jeg har tryllet en gylden ring om to rigtige tal." : "Du har allerede fundet dem alle!", 4);
+    wrongs.forEach(p => { p.dying = .5; burst(p.x, p.y, "#fff3a0", 24, 200); });
+    say("Uglesyn! Jeg har fjernet to forkerte svar.", 4);
     mood("happy", 1.4);
     [523, 784, 1047, 1568].forEach((f, i) => setTimeout(() => tone(f, .3, "sine", .12), i * 90));
     burst(OWL.x, OWL.y - 20, "#fff3a0", 30, 240);
   }
   cv.addEventListener("pointermove", e => {
     const [x, y] = toLogical(e);
-    hover = pegAt(x, y); owlHover = onOwl(x, y);
-    cv.style.cursor = hover >= 0 || (owlHover && power >= POWER_MAX) ? "pointer" : "default";
+    hover = pegAt(x, y);
+    cv.style.cursor = hover >= 0 || (onOwl(x, y) && power >= POWER_MAX) ? "pointer" : "default";
   });
-  cv.addEventListener("pointerleave", () => { hover = -1; owlHover = false; });
+  cv.addEventListener("pointerleave", () => { hover = -1; });
   cv.addEventListener("pointerup", e => {
     const [x, y] = toLogical(e);
     const i = pegAt(x, y);
@@ -371,7 +406,7 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
   cv.tabIndex = 0;
   cv.addEventListener("keydown", e => {
     if (e.key === "u" || e.key === "U") { useOwlPower(); return; }
-    const live = pegs.map((p, i) => i).filter(i => pegs[i].alive && !pegs[i].lit).sort((a, b) => pegs[a].x - pegs[b].x || pegs[a].y - pegs[b].y);
+    const live = pegs.map((p, i) => i).filter(i => clickable(pegs[i])).sort((a, b) => pegs[a].x - pegs[b].x);
     if (!live.length) return;
     const k = live.indexOf(hover);
     if (e.key === "ArrowRight" || e.key === "ArrowDown") { hover = live[(k + 1) % live.length]; e.preventDefault(); }
@@ -396,25 +431,22 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     if (p.ok) {
       p.lit = true; p.litT = 0; streak++;
       const pts = 10 * streak; score += pts; addCoins(pts);
-      found.add(p.v);
-      if (power < POWER_MAX) { power++; if (power === POWER_MAX) { say("Min månekugle er fuld! Klik på mig for Uglesyn.", 5); tone(1047, .3, "sine", .12); } }
+      solved[pi] = `${ptext(prob)} = ${prob.ans}`;
+      if (power < POWER_MAX) { power++; if (power === POWER_MAX) { say("Min månekugle er fuld! Klik på mig, så fjerner jeg to forkerte svar.", 5); tone(1047, .3, "sine", .12); } }
       burst(p.x, p.y, "#ffb21f", 16);
-      floatText(p.x, p.y - 40, `${table} × ${p.v / table} = ${p.v}`, "#fff8ec", 24);
-      floatText(p.x, p.y + 42, streak > 1 ? `+${pts}  (${streak} i træk!)` : `+${pts}`, "#ffd23f", 18);
-      const notes = [523, 587, 659, 698, 784, 880, 988, 1047, 1175, 1319];
-      tone(notes[Math.min(streak - 1, 9)], .22, "sine", .22);
+      floatText(p.x, p.y - 50, solved[pi], "#fff8ec", 26);
+      floatText(p.x, p.y + 52, streak > 1 ? `+${pts}  (${streak} i træk!)` : `+${pts}`, "#ffd23f", 18);
+      tone([523, 659, 784, 1047][Math.min(streak - 1, 3)], .22, "sine", .22);
       mood("happy");
-      if (power < POWER_MAX) say(streak >= 3 ? `${streak} i træk! Hu-hu!` : PRAISE[Math.random() * PRAISE.length | 0], 2.5);
+      if (power < POWER_MAX) say(PRAISE[Math.random() * PRAISE.length | 0], 2.5);
       renderChips(); renderStats();
       if (b.final) {
         phase = "clear"; clearT = 0; fireworkT = 0; clearQueue = pegs.filter(q => q.alive && !q.ok);
-        say("MESTERLIGT! Du kan hele tabellen!", 6);
-      } else phase = "play";
+        say(`Level ${level} klaret! Mesterligt!`, 6);
+      } else { phase = "between"; betweenT = 0; }
     } else {
-      p.shake = .5; p.wrong = .9; mistakes++; streak = 0;
-      const lo = Math.floor(p.v / table) * table;
-      const hint = lo === 0 ? `Det mindste tal i tabellen er ${table}.` : `${p.v} ligger mellem ${lo} og ${lo + table}.`;
-      say(`Hov! ${p.v} er ikke i ${table}-tabellen. ${hint}`, 5);
+      p.shake = .5; p.wrong = .9; p.dying = .9; mistakes++; streak = 0;
+      say(`Hov, ${p.v} er ikke rigtigt. ${hint(prob)}`, 6);
       mood("sad", 1.5);
       tone(150, .25, "square", .08, .6);
       if (mistakes >= 3) { phase = "lost"; setTimeout(() => finish(false), 1100); }
@@ -424,6 +456,7 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
 
   function step(dt) {
     time += dt;
+    signPop = Math.min(1, signPop + dt * 2.2);
     owl.moodT -= dt; if (owl.moodT <= 0) owl.mood = "idle";
     owl.hop = Math.max(0, owl.hop - dt * 2.5);
     owl.blinkT -= dt; if (owl.blinkT < -.14) owl.blinkT = 2 + Math.random() * 3;
@@ -435,7 +468,14 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
 
     for (const p of pegs) {
       p.shake = Math.max(0, p.shake - dt); p.wrong = Math.max(0, p.wrong - dt); p.appear += dt;
-      if (p.lit && p.alive) { p.litT += dt; if (p.litT > .75) { p.alive = false; burst(p.x, p.y, "#ffcf4a", 18, 170); tone(1400 + Math.random() * 300, .05, "sine", .05); } }
+      if (p.dying > 0 && p.alive) { p.dying -= dt; if (p.dying <= 0) { p.alive = false; burst(p.x, p.y, "#c9c2e8", 14, 140); } }
+      if (p.lit && p.alive) { p.litT += dt; if (p.litT > .9) { p.alive = false; burst(p.x, p.y, "#ffcf4a", 22, 190); tone(1400 + Math.random() * 300, .05, "sine", .05); } }
+    }
+    if (phase === "between") {
+      betweenT += dt;
+      const others = pegs.filter(q => q.alive && !q.ok && !q.dying);
+      if (betweenT > .45 && others.length) others[0].dying = .01;
+      if (betweenT > 1.5) { pi++; spawnProblem(); }
     }
     if (shot) {
       const p = shot.peg, dx = p.x - shot.x, dy = p.y - shot.y, d = Math.hypot(dx, dy), sp = 1100 * dt;
@@ -462,7 +502,7 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     if (phase === "clear") {
       clearT += dt;
       if (clearT > .9) { timeScale += (1 - timeScale) * .1; zoom.target = 1; }
-      if (clearT > 1.1 && clearQueue.length && (clearT - 1.1) / .14 > (6 - clearQueue.length)) {
+      if (clearT > 1.1 && clearQueue.length && (clearT - 1.1) / .16 > (4 - clearQueue.length)) {
         const q = clearQueue.shift(); q.alive = false; burst(q.x, q.y, `hsl(${Math.random() * 360},90%,65%)`, 22); tone(600 + Math.random() * 800, .08, "triangle", .1);
       }
       fireworkT -= dt;
@@ -479,23 +519,25 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
   function finish(won) {
     const ov = $("ov");
     if (won) {
-      const stars = 3 - mistakes;
-      if (!best[table] || stars > best[table]) { best[table] = stars; try { localStorage.setItem("gk-best", JSON.stringify(best)); } catch (e) {} }
-      const next = table >= 10 ? 2 : table + 1, bonus = stars * 50;
+      const stars = Math.max(1, 3 - mistakes);
+      if (!best[level] || stars > best[level]) { best[level] = stars; try { localStorage.setItem("gk-lv", JSON.stringify(best)); } catch (e) {} }
+      if (level < LEVELS.length) save.unlocked = Math.max(save.unlocked, level + 1);
+      const bonus = stars * 50;
       addCoins(bonus);
+      const last = level >= LEVELS.length;
       ov.innerHTML = `<div class="stars">${"★".repeat(stars)}${"☆".repeat(3 - stars)}</div>
-        <h2>Mesterligt!</h2><p>Du fandt alle 10 tal i ${table}-tabellen og fik ${score} point. Stjernebonus: +${bonus} mønter.</p>
-        <div class="row"><button id="b1">Videre til ${next}-tabellen</button><button class="alt" id="b2">Spil igen</button></div>`;
-      $("b1").onclick = () => { table = next; newLevel(); };
+        <h2>${last ? "Du har klaret alle 20 levels!" : `Level ${level} klaret!`}</h2>
+        <p>Du fik ${score} point. Stjernebonus: +${bonus} mønter.${last ? " Professor Hu er stolt af dig!" : ""}</p>
+        <div class="row">${last ? "" : `<button id="b1">Videre til level ${level + 1}</button>`}<button class="alt" id="b2">Spil level ${level} igen</button></div>`;
+      if (!last) $("b1").onclick = () => startLevel(level + 1);
       [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, .25, "triangle", .18), i * 120));
     } else {
-      const all = [...Array(10)].map((_, k) => table * (k + 1));
-      ov.innerHTML = `<h2>Øv, 3 forkerte!</h2><p>Uglen hvisker: ${table}-tabellen er <b>${all.join(", ")}</b>. Prøv igen, du kan godt!</p>
+      ov.innerHTML = `<h2>Øv, 3 forkerte!</h2><p>Uglen hvisker: ${prob ? `${ptext(prob)} = ${prob.ans}. ` : ""}Prøv level ${level} igen, du kan godt!</p>
         <div class="row"><button id="b2">Prøv igen</button></div>`;
       tone(330, .3, "triangle", .15, .6);
     }
-    $("b2").onclick = newLevel;
-    renderPicker();
+    $("b2").onclick = () => startLevel(level);
+    renderLevels();
     ov.hidden = false;
     setTimeout(() => { const b = ov.querySelector("button"); if (b) b.focus(); }, 50);
   }
@@ -511,34 +553,28 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     scene.width = cv.width; scene.height = cv.height;
     const c = sctx, R = rng(7);
     c.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
-    // sky
     const g = c.createLinearGradient(0, 0, 0, H * .75);
     g.addColorStop(0, th.sky[0]); g.addColorStop(1, th.sky[1]);
     c.fillStyle = g; c.fillRect(0, 0, W, H);
-    // stars
     c.fillStyle = "#ffffff";
     for (let i = 0; i < 90; i++) { c.globalAlpha = .3 + R() * .6; const s = R() < .15 ? 2.5 : 1.4; c.fillRect(R() * W, R() * 300, s, s); }
     c.globalAlpha = 1;
-    // moon
-    const mx = 900, my = 120;
+    const mx = 900, my = 190;
     const mg = c.createRadialGradient(mx, my, 20, mx, my, 160);
     mg.addColorStop(0, th.moon + "aa"); mg.addColorStop(1, th.moon + "00");
     c.fillStyle = mg; c.fillRect(mx - 160, my - 160, 320, 320);
     c.fillStyle = th.moon; c.beginPath(); c.arc(mx, my, 48, 0, 6.28); c.fill();
     c.fillStyle = "rgba(0,0,0,.07)";
     for (const [ox, oy, r] of [[-14, -10, 10], [12, 8, 7], [-4, 18, 5], [18, -16, 4]]) { c.beginPath(); c.arc(mx + ox, my + oy, r, 0, 6.28); c.fill(); }
-    // far mountains
     c.fillStyle = th.far; c.beginPath(); c.moveTo(0, H);
     let x = 0; c.lineTo(0, 360);
     while (x < W) { const w = 70 + R() * 90; c.lineTo(x + w / 2, 250 + R() * 90); x += w; c.lineTo(x, 340 + R() * 40); }
     c.lineTo(W, H); c.fill();
-    // castle hill
     c.fillStyle = th.mid;
     c.beginPath(); c.moveTo(0, H);
     for (let xx = 0; xx <= W; xx += 10) c.lineTo(xx, 430 - Math.exp(-((xx - 640) ** 2) / 50000) * 90 - Math.sin(xx * .01) * 14);
     c.lineTo(W, H); c.fill();
     drawCastle(c, 640, 342, th);
-    // round trees on the hill
     for (let i = 0; i < 26; i++) {
       const tx = R() * W, ty = 420 + R() * 40 - Math.exp(-((tx - 640) ** 2) / 50000) * 80;
       if (Math.abs(tx - 640) < 90) continue;
@@ -546,7 +582,6 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
       c.fillStyle = th.mid; c.beginPath(); c.arc(tx, ty - r, r, 0, 6.28); c.arc(tx - r * .6, ty - r * .5, r * .7, 0, 6.28); c.arc(tx + r * .6, ty - r * .5, r * .7, 0, 6.28); c.fill();
       c.fillStyle = "rgba(255,255,255,.06)"; c.beginPath(); c.arc(tx - r * .3, ty - r * 1.3, r * .5, 0, 6.28); c.fill();
     }
-    // near pine forest
     for (let i = 0; i < 34; i++) {
       const tx = (i / 34) * W + R() * 30, h = 120 + R() * 110, base = H - 40 + R() * 20, w = h * .38;
       c.fillStyle = th.near;
@@ -556,7 +591,6 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
       }
       c.fillRect(tx - 4, base - h * .1, 8, h * .15);
     }
-    // ground with mushrooms and flowers
     c.fillStyle = th.ground;
     c.beginPath(); c.moveTo(0, H);
     for (let xx = 0; xx <= W; xx += 10) c.lineTo(xx, H - 34 - Math.sin(xx * .02) * 6);
@@ -572,25 +606,21 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
       c.globalAlpha = .8; c.beginPath(); c.arc(R() * W, H - 20 - R() * 16, 2.2, 0, 6.28); c.fill();
     }
     c.globalAlpha = 1;
-    // owl tree (left panel)
     const bark = c.createLinearGradient(0, 0, 80, 0);
     bark.addColorStop(0, "#3b2412"); bark.addColorStop(.5, "#6b4423"); bark.addColorStop(1, "#3b2412");
     c.fillStyle = bark;
     c.beginPath(); c.moveTo(-10, H); c.lineTo(10, 200); c.quadraticCurveTo(30, 120, 20, 60); c.lineTo(70, 60); c.quadraticCurveTo(66, 200, 82, H); c.fill();
     c.strokeStyle = "#2c1a0b"; c.lineWidth = 2;
     for (let i = 0; i < 8; i++) { c.beginPath(); c.moveTo(25 + R() * 30, 120 + i * 70); c.quadraticCurveTo(40, 150 + i * 70, 30 + R() * 30, 170 + i * 70); c.stroke(); }
-    // branch
     c.fillStyle = "#5a3a1c";
     c.beginPath(); c.moveTo(50, 350); c.quadraticCurveTo(140, 352, 232, 340); c.lineTo(234, 352); c.quadraticCurveTo(140, 372, 50, 376); c.fill();
     c.fillStyle = "#4f8f3a";
     for (const [lx, ly] of [[218, 336], [228, 344], [205, 332]]) { c.beginPath(); c.ellipse(lx, ly, 9, 5, -.5, 0, 6.28); c.fill(); }
-    // leaf canopy top-left
     for (let i = 0; i < 14; i++) {
       c.fillStyle = i % 2 ? "#2f6b2a" : "#3d8034"; c.globalAlpha = .95;
       c.beginPath(); c.arc(R() * 230 - 20, R() * 90 - 20, 34 + R() * 26, 0, 6.28); c.fill();
     }
     c.globalAlpha = 1;
-    // vignette
     const vg = c.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, W * .7);
     vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.45)");
     c.fillStyle = vg; c.fillRect(0, 0, W, H);
@@ -613,7 +643,7 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     c.fillStyle = "#1a1030"; c.beginPath(); c.arc(x, y + 10, 14, Math.PI, 0); c.fill();
   }
 
-  // ---------- page backdrop: the same fairy-tale forest, soft and dimmed behind the whole page ----------
+  // ---------- page backdrop: the same forest, soft and dimmed behind the whole page ----------
   const bgc = document.getElementById("bgc"), bctx = bgc.getContext("2d");
   let bgKey = "";
   function paintPageBg() {
@@ -639,21 +669,18 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
   }
   window.addEventListener("resize", resize);
 
-  const FLIES = Array.from({ length: 22 }, (_, i) => ({ x: Math.random() * W, y: 200 + Math.random() * 380, p: Math.random() * 6.28, s: .3 + Math.random() * .6 }));
+  const FLIES = Array.from({ length: 22 }, () => ({ x: Math.random() * W, y: 200 + Math.random() * 380, p: Math.random() * 6.28, s: .3 + Math.random() * .6 }));
   function drawAmbient(th) {
-    // drifting mist
     for (let i = 0; i < 3; i++) {
       const mx = ((time * (10 + i * 6) + i * 400) % (W + 600)) - 300, my = 470 + i * 45;
       const mg = ctx.createRadialGradient(mx, my, 10, mx, my, 260);
       mg.addColorStop(0, th.mist + "30"); mg.addColorStop(1, th.mist + "00");
       ctx.fillStyle = mg; ctx.fillRect(mx - 260, my - 260, 520, 520);
     }
-    // fireflies
     for (const f of FLIES) {
       const x = f.x + Math.sin(time * f.s + f.p) * 40, y = f.y + Math.cos(time * f.s * 1.3 + f.p) * 25;
-      const a = .4 + .6 * Math.max(0, Math.sin(time * 2.2 + f.p * 3));
-      ctx.globalAlpha = a; ctx.fillStyle = th.fly;
-      ctx.shadowColor = th.fly; ctx.shadowBlur = 10;
+      ctx.globalAlpha = .4 + .6 * Math.max(0, Math.sin(time * 2.2 + f.p * 3));
+      ctx.fillStyle = th.fly; ctx.shadowColor = th.fly; ctx.shadowBlur = 10;
       ctx.beginPath(); ctx.arc(x, y, 2.4, 0, 6.28); ctx.fill();
     }
     ctx.shadowBlur = 0; ctx.globalAlpha = 1;
@@ -683,36 +710,75 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
   }
 
+  function drawSign(cx, top, w, h, scale, draw) {
+    // ropes from the top beam
+    ctx.strokeStyle = "#c9a376"; ctx.lineWidth = 3;
+    for (const sx of [cx - w * .35, cx + w * .35]) { ctx.beginPath(); ctx.moveTo(sx, 18); ctx.lineTo(sx, top + 6); ctx.stroke(); }
+    ctx.save(); ctx.translate(cx, top + h / 2); ctx.scale(scale, scale); ctx.rotate(Math.sin(time * 1.2) * .012);
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+    ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-w / 2 + 3, -h / 2 + 5, w, h, 12); else ctx.rect(-w / 2 + 3, -h / 2 + 5, w, h); ctx.fill();
+    const g = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
+    g.addColorStop(0, "#b07a43"); g.addColorStop(1, "#7a4a22");
+    ctx.fillStyle = g; ctx.strokeStyle = "#4a2a10"; ctx.lineWidth = 4;
+    ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-w / 2, -h / 2, w, h, 12); else ctx.rect(-w / 2, -h / 2, w, h); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = "rgba(74,42,16,.35)"; ctx.lineWidth = 1.5;
+    for (const yy of [-h / 6, h / 6]) { ctx.beginPath(); ctx.moveTo(-w / 2 + 10, yy); ctx.lineTo(w / 2 - 10, yy); ctx.stroke(); }
+    ctx.fillStyle = "#3a2410";
+    for (const sx of [-w * .35, w * .35]) { ctx.beginPath(); ctx.arc(sx, -h / 2 + 8, 3.5, 0, 6.28); ctx.fill(); }
+    draw();
+    ctx.restore();
+  }
+
+  function drawSigns() {
+    if (!prob) return;
+    const t = signPop, el = t < 1 ? 1 + Math.sin(t * Math.PI * 2.5) * (1 - t) * .5 : 1;
+    const scale = Math.max(.05, Math.min(1.2, t * 3)) * el;
+    const solvedNow = phase === "between" || phase === "clear" || phase === "won";
+    drawSign(BX0 + 175, 40, 300, 92, scale, () => {
+      ctx.font = '800 46px "Baloo 2", sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const txt = `${ptext(prob)} = ${solvedNow ? prob.ans : "?"}`;
+      ctx.lineWidth = 6; ctx.strokeStyle = "#3a2410"; ctx.strokeText(txt, 0, 4);
+      ctx.fillStyle = solvedNow ? "#ffe066" : "#fff8ec"; ctx.fillText(txt, 0, 4);
+    });
+    drawSign(BX1 - 125, 34, 210, 74, 1, () => {
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = '700 28px "Cherry Swash", Georgia, serif';
+      ctx.lineWidth = 5; ctx.strokeStyle = "#3a2410"; ctx.strokeText(`Level ${level}`, 0, -12);
+      ctx.fillStyle = "#ffd23f"; ctx.fillText(`Level ${level}`, 0, -12);
+      ctx.font = '800 15px "Nunito", sans-serif';
+      ctx.fillStyle = "#fff8ec"; ctx.fillText(`Regnestykke ${Math.min(pi + 1, 3)} af 3`, 0, 18);
+    });
+  }
+
   function drawPeg(p, th) {
     if (!p.alive) return;
     const s = Math.min(1, Math.max(0, p.appear * 4));
     if (s <= 0) return;
+    const pop = s < 1 ? s : 1 + Math.max(0, Math.sin(Math.min(1, p.appear * 4 - 1) * Math.PI)) * .0;
     const sx = p.shake ? Math.sin(time * 60) * 6 * (p.shake / .5) : 0;
-    const x = p.x + sx, y = p.y, r = Math.max(2, PEG_R * (p.lit ? 1 + Math.sin(p.litT * 20) * .06 : s));
+    let r = PEG_R * (p.lit ? 1 + Math.sin(p.litT * 20) * .06 : pop);
+    if (p.dying > 0) r *= Math.max(.2, Math.min(1, p.dying / .4));
+    r = Math.max(2, r);
+    const x = p.x + sx, y = p.y;
     let col = th.peg;
     if (p.lit) col = "#ff8a1f";
     if (p.wrong > 0) col = "#e8384f";
-    if (p.reveal && !p.lit) {
-      ctx.save(); ctx.translate(x, y); ctx.rotate(time * 1.5);
-      ctx.strokeStyle = "#ffe066"; ctx.lineWidth = 4; ctx.shadowColor = "#ffe066"; ctx.shadowBlur = 18;
-      ctx.setLineDash([10, 7]); ctx.beginPath(); ctx.arc(0, 0, r + 9, 0, 6.28); ctx.stroke(); ctx.setLineDash([]);
-      ctx.restore(); ctx.shadowBlur = 0;
-    }
-    if (p.lit) { ctx.shadowColor = "#ffb21f"; ctx.shadowBlur = 28; }
+    if (p.lit) { ctx.shadowColor = "#ffb21f"; ctx.shadowBlur = 30; }
     else if (p.wrong > 0) { ctx.shadowColor = "#ff3d55"; ctx.shadowBlur = 18; }
-    ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.beginPath(); ctx.arc(x + 2, y + 4, r, 0, 6.28); ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.beginPath(); ctx.arc(x + 2, y + 5, r, 0, 6.28); ctx.fill();
     const g = ctx.createRadialGradient(x - r * .35, y - r * .4, r * .1, x, y, r);
     g.addColorStop(0, "#ffffff"); g.addColorStop(.22, col); g.addColorStop(1, shade(col, -.45));
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.28); ctx.fill();
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = "rgba(255,255,255,.4)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, r - 1, 0, 6.28); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,.45)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, Math.max(1, r - 1.5), 0, 6.28); ctx.stroke();
     if (hover >= 0 && pegs[hover] === p && phase === "play") {
-      ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3; ctx.setLineDash([6, 5]); ctx.lineDashOffset = -time * 20;
-      ctx.beginPath(); ctx.arc(x, y, r + 7, 0, 6.28); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3; ctx.setLineDash([7, 5]); ctx.lineDashOffset = -time * 20;
+      ctx.beginPath(); ctx.arc(x, y, r + 8, 0, 6.28); ctx.stroke(); ctx.setLineDash([]);
     }
-    ctx.fillStyle = "#fff"; ctx.font = `800 ${p.v > 99 ? 19 : 24}px "Baloo 2", sans-serif`;
-    ctx.lineWidth = 4; ctx.strokeStyle = "rgba(0,0,0,.45)";
-    ctx.strokeText(p.v, x, y + 2); ctx.fillText(p.v, x, y + 2);
+    const fs = (p.v > 99 ? 26 : 32) * (r / PEG_R);
+    ctx.fillStyle = "#fff"; ctx.font = `800 ${Math.max(4, fs).toFixed(1)}px "Baloo 2", sans-serif`;
+    ctx.lineWidth = 4.5; ctx.strokeStyle = "rgba(0,0,0,.45)";
+    ctx.strokeText(p.v, x, y + 3); ctx.fillText(p.v, x, y + 3);
   }
 
   function drawBall(b, bl, alpha = 1) {
@@ -758,13 +824,11 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     const tilt = owl.mood === "sad" ? Math.sin(time * 18) * .08 : Math.sin(time * 1.3) * .03;
     const x = OWL.x, y = OWL.y + bob;
     ctx.save(); ctx.translate(x, y); ctx.rotate(tilt);
-    // glow when power ready
     if (power >= POWER_MAX) {
       const gg = ctx.createRadialGradient(0, 0, 20, 0, 0, 110);
       gg.addColorStop(0, "rgba(255,240,150,.55)"); gg.addColorStop(1, "rgba(255,240,150,0)");
       ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(0, 0, 110 + Math.sin(time * 5) * 6, 0, 6.28); ctx.fill();
     }
-    // wings
     const flap = owl.mood === "happy" ? Math.sin(time * 22) * .5 : 0;
     for (const sd of [-1, 1]) {
       ctx.save(); ctx.translate(sd * 40, 6); ctx.rotate(sd * (.2 + flap));
@@ -772,21 +836,16 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
       ctx.fillStyle = "#8a5a33"; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.ellipse(0, 22 + k * 9, 11, 5, 0, 0, Math.PI); ctx.fill(); }
       ctx.restore();
     }
-    // body
     const bg = ctx.createRadialGradient(-12, -20, 8, 0, 0, 62);
     bg.addColorStop(0, "#b07a4a"); bg.addColorStop(1, "#6b4226");
     ctx.fillStyle = bg; ctx.beginPath(); ctx.ellipse(0, 0, 46, 54, 0, 0, 6.28); ctx.fill();
-    // belly with scallops
     ctx.fillStyle = "#f3dcb5"; ctx.beginPath(); ctx.ellipse(0, 18, 30, 32, 0, 0, 6.28); ctx.fill();
     ctx.strokeStyle = "#c9a376"; ctx.lineWidth = 2;
     for (let r = 0; r < 3; r++) for (let k = -2; k <= 2; k++) { if (Math.abs(k) + r > 3) continue; ctx.beginPath(); ctx.arc(k * 10 + (r % 2) * 5, 6 + r * 11, 5, 0, Math.PI); ctx.stroke(); }
-    // ear tufts
     ctx.fillStyle = "#6b4226";
     for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(sd * 18, -46); ctx.lineTo(sd * 36, -74); ctx.lineTo(sd * 38, -40); ctx.fill(); }
-    // face disc
     ctx.fillStyle = "#e8c899";
     for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(sd * 18, -18, 21, 0, 6.28); ctx.fill(); }
-    // eyes
     const blink = owl.blinkT < 0 || owl.mood === "sad" && Math.sin(time * 3) > .7;
     for (const sd of [-1, 1]) {
       const ex = sd * 18, ey = -18;
@@ -797,27 +856,21 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
       ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(ex + owl.lookX * 6 - 2, ey + owl.lookY * 6 - 3, 2, 0, 6.28); ctx.fill();
       if (owl.mood === "sad") { ctx.strokeStyle = "#3a2410"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ex - 12, ey - 18 + sd * -4); ctx.lineTo(ex + 12, ey - 18 + sd * 4); ctx.stroke(); }
     }
-    // glasses
     ctx.strokeStyle = "#c9a227"; ctx.lineWidth = 2.5;
     for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(sd * 18, -18, 17, 0, 6.28); ctx.stroke(); }
     ctx.beginPath(); ctx.moveTo(-2, -20); ctx.lineTo(2, -20); ctx.stroke();
-    // beak
     ctx.fillStyle = "#f2a516"; ctx.beginPath(); ctx.moveTo(-7, -6); ctx.lineTo(7, -6); ctx.lineTo(0, owl.mood === "happy" ? 10 : 6); ctx.closePath(); ctx.fill();
-    // wizard hat
     ctx.save(); ctx.translate(0, -50); ctx.rotate(-.12);
     ctx.fillStyle = "#3b2a9e"; ctx.beginPath(); ctx.ellipse(0, 4, 40, 9, 0, 0, 6.28); ctx.fill();
     ctx.beginPath(); ctx.moveTo(-26, 2); ctx.quadraticCurveTo(-8, -40, 14, -70); ctx.quadraticCurveTo(10, -30, 26, 2); ctx.closePath(); ctx.fill();
     ctx.fillStyle = "#ffd23f";
     const star = (sx, sy, r) => { ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, rr = i % 2 ? r * .45 : r; ctx.lineTo(sx + Math.cos(a) * rr, sy + Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); };
     star(-4, -18, 6); star(9, -40, 4); star(13, -70, 5);
-    ctx.fillStyle = "#ffd23f"; ctx.fillRect(-24, -4, 48, 5);
+    ctx.fillRect(-24, -4, 48, 5);
     ctx.restore();
-    // feet
     ctx.fillStyle = "#f2a516";
     for (const sd of [-1, 1]) for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.ellipse(sd * 16 + k * 5, 52, 3, 6, 0, 0, 6.28); ctx.fill(); }
     ctx.restore();
-
-    // name plate
     ctx.font = '700 17px "Cherry Swash", Georgia, serif'; ctx.textAlign = "center";
     ctx.lineWidth = 4; ctx.strokeStyle = "rgba(10,8,30,.8)"; ctx.strokeText("Professor Hu", OWL.x, 402);
     ctx.fillStyle = "#ffd23f"; ctx.fillText("Professor Hu", OWL.x, 402);
@@ -831,10 +884,9 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
   }
   function drawSpeech() {
     if (speech.t <= 0 || !speech.text) return;
-    const a = Math.min(1, speech.t * 3);
-    ctx.globalAlpha = a;
+    ctx.globalAlpha = Math.min(1, speech.t * 3);
     ctx.font = '800 16px "Nunito", sans-serif'; ctx.textAlign = "left"; ctx.textBaseline = "top";
-    const lines = wrap(speech.text, 196), lh = 21, bw = 222, bh = lines.length * lh + 22, bx = 14, by = 182 - bh;
+    const lines = wrap(speech.text, 196), lh = 21, bw = 222, bh = lines.length * lh + 22, bx = 14, by = Math.max(6, 182 - bh);
     ctx.fillStyle = "#fffaf0"; ctx.strokeStyle = "#3b2a9e"; ctx.lineWidth = 3;
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(bx, by, bw, bh, 16); else ctx.rect(bx, by, bw, bh);
@@ -848,7 +900,6 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
   }
 
   function drawPanelHud() {
-    // lives
     ctx.font = '800 14px "Nunito", sans-serif'; ctx.textAlign = "center";
     ctx.lineWidth = 4; ctx.strokeStyle = "rgba(10,8,30,.8)";
     ctx.strokeText("LIV", OWL.x, 438); ctx.fillStyle = "#fff8ec"; ctx.fillText("LIV", OWL.x, 438);
@@ -862,7 +913,6 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
       if (alive) { ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.beginPath(); ctx.arc(-7, -9, 3.5, 0, 6.28); ctx.fill(); }
       ctx.restore();
     }
-    // power orb
     const ox = OWL.x, oy = 560, r = 38;
     ctx.strokeText("UGLESYN", ox, 510); ctx.fillStyle = "#fff8ec"; ctx.fillText("UGLESYN", ox, 510);
     ctx.fillStyle = "rgba(10,8,30,.6)"; ctx.beginPath(); ctx.arc(ox, oy, r, 0, 6.28); ctx.fill();
@@ -890,6 +940,7 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     zoom.z += (zoom.target - zoom.z) * .06;
     const sx = cv.width / W, sy = cv.height / H;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.setTransform(sx, 0, 0, sy, 0, 0);
     ctx.drawImage(scene, 0, 0, W, H);
@@ -898,48 +949,47 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     drawOwl();
     drawPanelHud();
     ctx.save();
-    ctx.beginPath(); ctx.rect(BX0, 0, BX1 - BX0, H); ctx.clip();
-    if (zoom.z > 1.001) { ctx.translate(zoom.x, zoom.y); ctx.scale(zoom.z, zoom.z); ctx.translate(-zoom.x, -zoom.y); }
-    for (const p of pegs) drawPeg(p, th);
-    drawBucket();
-    // cannon
-    ctx.save(); ctx.translate(CX, CY - 8); ctx.rotate(angle);
-    const bg = ctx.createLinearGradient(0, -13, 0, 13);
-    bg.addColorStop(0, shade(cn.barrel, .3)); bg.addColorStop(1, shade(cn.barrel, -.35));
-    ctx.fillStyle = bg; ctx.fillRect(0, -13, 50, 26);
-    ctx.fillStyle = cn.base; ctx.fillRect(43, -15, 9, 30);
-    ctx.restore();
-    const cg = ctx.createRadialGradient(CX - 7, CY - 15, 2, CX, CY - 8, 27);
-    cg.addColorStop(0, "#ffffff"); cg.addColorStop(.3, cn.base); cg.addColorStop(1, shade(cn.base, -.4));
-    ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(CX, CY - 8, 26, 0, 6.28); ctx.fill();
-    ctx.fillStyle = "#fff8ec"; ctx.font = '800 18px "Baloo 2", sans-serif';
-    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(0,0,0,.35)";
-    ctx.strokeText("×" + table, CX, CY - 7); ctx.fillText("×" + table, CX, CY - 7);
-    for (const f of fallers) drawBall(f, bl, .55);
-    if (shot) drawBall(shot, bl, 1);
-    for (const p of particles) {
-      ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.5)); ctx.fillStyle = p.col;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, 6.28); ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    for (const f of floats) {
-      ctx.globalAlpha = Math.min(1, f.life * 1.5);
-      ctx.font = `800 ${f.size}px "Baloo 2", sans-serif`;
-      const x = Math.max(BX0 + 130, Math.min(BX1 - 130, f.x));
-      ctx.lineWidth = 5; ctx.strokeStyle = "rgba(10,8,30,.85)"; ctx.strokeText(f.text, x, f.y);
-      ctx.fillStyle = f.col; ctx.fillText(f.text, x, f.y);
-    }
-    ctx.globalAlpha = 1;
-    ctx.restore();
+    try {
+      ctx.beginPath(); ctx.rect(BX0, 0, BX1 - BX0, H); ctx.clip();
+      if (zoom.z > 1.001) { ctx.translate(zoom.x, zoom.y); ctx.scale(zoom.z, zoom.z); ctx.translate(-zoom.x, -zoom.y); }
+      drawSigns();
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      for (const p of pegs) drawPeg(p, th);
+      drawBucket();
+      ctx.save(); ctx.translate(CX, CY - 8); ctx.rotate(angle);
+      const bg = ctx.createLinearGradient(0, -13, 0, 13);
+      bg.addColorStop(0, shade(cn.barrel, .3)); bg.addColorStop(1, shade(cn.barrel, -.35));
+      ctx.fillStyle = bg; ctx.fillRect(0, -13, 50, 26);
+      ctx.fillStyle = cn.base; ctx.fillRect(43, -15, 9, 30);
+      ctx.restore();
+      const cg = ctx.createRadialGradient(CX - 7, CY - 15, 2, CX, CY - 8, 27);
+      cg.addColorStop(0, "#ffffff"); cg.addColorStop(.3, cn.base); cg.addColorStop(1, shade(cn.base, -.4));
+      ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(CX, CY - 8, 26, 0, 6.28); ctx.fill();
+      for (const f of fallers) drawBall(f, bl, .55);
+      if (shot) drawBall(shot, bl, 1);
+      for (const p of particles) {
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.5)); ctx.fillStyle = p.col;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, 6.28); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      for (const f of floats) {
+        ctx.globalAlpha = Math.max(0, Math.min(1, f.life * 1.5));
+        ctx.font = `800 ${f.size}px "Baloo 2", sans-serif`;
+        const x = Math.max(BX0 + 140, Math.min(BX1 - 140, f.x));
+        ctx.lineWidth = 5; ctx.strokeStyle = "rgba(10,8,30,.85)"; ctx.strokeText(f.text, x, f.y);
+        ctx.fillStyle = f.col; ctx.fillText(f.text, x, f.y);
+      }
+      ctx.globalAlpha = 1;
+    } finally { ctx.restore(); }
     drawFrame(cn);
     drawSpeech();
     if (phase === "clear" && clearT > .3) {
       ctx.globalAlpha = Math.min(1, (clearT - .3) * 2);
       ctx.font = '700 72px "Cherry Swash", Georgia, serif';
-      const tg = ctx.createLinearGradient(CX - 200, 0, CX + 200, 0);
+      const tg = ctx.createLinearGradient(CX - 220, 0, CX + 220, 0);
       for (let i = 0; i <= 6; i++) tg.addColorStop(i / 6, `hsl(${(i * 60 + time * 200) % 360},95%,62%)`);
-      ctx.lineWidth = 10; ctx.strokeStyle = "rgba(10,8,30,.85)"; ctx.strokeText("ALLE 10!", CX, 320);
-      ctx.fillStyle = tg; ctx.fillText("ALLE 10!", CX, 320);
+      ctx.lineWidth = 10; ctx.strokeStyle = "rgba(10,8,30,.85)"; ctx.strokeText(`LEVEL ${level}!`, CX, 330);
+      ctx.fillStyle = tg; ctx.fillText(`LEVEL ${level}!`, CX, 330);
       ctx.globalAlpha = 1;
     }
   }
@@ -955,16 +1005,16 @@ canvas { width: 100%; height: 100%; display: block; border-radius: 20px; touch-a
     requestAnimationFrame(loop);
   }
 
-  window.__gk = { get pegs() { return pegs; }, get phase() { return phase; }, get power() { return power; }, get mistakes() { return mistakes; }, fire, useOwlPower, step, draw };
+  window.__gk = { get pegs() { return pegs; }, get phase() { return phase; }, get power() { return power; }, get mistakes() { return mistakes; }, get level() { return level; }, get prob() { return prob; }, fire, useOwlPower, startLevel };
 
   let started = false;
   function start(data) {
     if (started) return; started = true;
-    if (data && data.table >= 2 && data.table <= 10) table = data.table;
+    let n = data && data.level >= 1 && data.level <= LEVELS.length ? data.level : save.unlocked;
     applyTheme(); $("coins").textContent = save.coins;
-    resize(); newLevel(); requestAnimationFrame(loop);
+    resize(); startLevel(Math.min(n, save.unlocked)); requestAnimationFrame(loop);
   }
-  try { window.claude?.hot?.snapshot?.(() => ({ table })); } catch (e) {}
+  try { window.claude?.hot?.snapshot?.(() => ({ level })); } catch (e) {}
   start(window.claude?.hot?.data ?? {});
 })();
 </script>
