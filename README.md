@@ -2,7 +2,7 @@
 
 ![Skærmbillede af spillet](screenshot.png)
 
-Et lærerigt sigte-og-skyd-spil i en eventyrskov med 20 levels i plus, minus og gange.
+Et lærerigt sigte-og-skyd-spil i en eventyrskov med 20 levels i plus, minus og lidt gange til indskolingen (7–8 år).
 
 ## Sådan spiller man
 - Hvert level har 3 regnestykker. De kommer ét ad gangen i tilfældig rækkefølge.
@@ -12,14 +12,23 @@ Et lærerigt sigte-og-skyd-spil i en eventyrskov med 20 levels i plus, minus og 
 - Rammer kuglen spanden i bunden, får du 25 bonusmønter. Brug mønterne i butikken på farvetemaer, kugler og kanoner.
 
 ## Sværhedsgrad
-| Level | Regneart |
-|---|---|
-| 1–3 | Plus med ét ciffer |
-| 4–6 | Plus med to cifre |
-| 7–9 | Minus |
-| 10 | Plus og minus blandet |
-| 11–16 | Gange, fra 2-, 5- og 10-tabellen op til 9 × 9 |
-| 17–20 | Alt blandet |
+Lavet til indskolingen (7–8 år). Det stiger langsomt og holder sig mest inden for 20.
+
+| Level | Indhold | Eksempel |
+|---|---|---|
+| 1–3 | Plus op til 10 | 4 + 3 |
+| 4–5 | Minus op til 10 | 7 − 3 |
+| 6 | Plus og minus blandet | 9 − 5 |
+| 7 | Tiervenner | 6 + 4 |
+| 8–9 | Plus op til 20, også over 10 | 8 + 5 |
+| 10–11 | Minus op til 20, også over 10 | 13 − 5 |
+| 12 | Dobbelt-op | 7 + 7 |
+| 13 | Hele tiere | 30 + 20 |
+| 14–16 | Tocifret uden mente | 23 + 4, 28 − 5, 35 + 20 |
+| 17–18 | Gange med 2, 5 og 10 | 2 × 3 |
+| 19–20 | Det hele blandet | 34 + 12 |
+
+Regnestykkerne står i listen `LEVELS` i `index.html` og er nemme at ændre.
 
 ## Verdener i butikken
 Hvert farvetema er sin egen verden med egne ting, der bevæger sig:

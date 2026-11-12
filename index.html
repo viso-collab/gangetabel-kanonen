@@ -150,32 +150,42 @@ canvas#c { width: 100%; height: 100%; display: block; border-radius: 20px; touch
   const $ = id => document.getElementById(id);
 
   // ---------- the 20 levels (fixed problems, shuffled order) ----------
+  // Made for indskoling (7–8 years): slow climb, mostly within 20, a little two-digit and the easiest times tables at the end.
   const LEVELS = [
-    [[2, "+", 3], [4, "+", 1], [3, "+", 3]],
-    [[5, "+", 2], [6, "+", 3], [4, "+", 4]],
-    [[7, "+", 2], [8, "+", 1], [5, "+", 4]],
-    [[12, "+", 5], [23, "+", 4], [31, "+", 7]],
-    [[14, "+", 12], [25, "+", 13], [32, "+", 21]],
-    [[27, "+", 15], [38, "+", 24], [46, "+", 19]],
-    [[8, "-", 3], [9, "-", 5], [7, "-", 4]],
-    [[15, "-", 4], [18, "-", 7], [26, "-", 5]],
-    [[34, "-", 12], [47, "-", 23], [52, "-", 18]],
-    [[36, "+", 27], [64, "-", 29], [45, "+", 38]],
-    [[2, "×", 3], [5, "×", 2], [10, "×", 4]],
-    [[2, "×", 7], [5, "×", 6], [10, "×", 8]],
-    [[3, "×", 4], [4, "×", 5], [3, "×", 8]],
-    [[6, "×", 3], [4, "×", 7], [6, "×", 6]],
-    [[7, "×", 7], [8, "×", 6], [9, "×", 4]],
-    [[7, "×", 8], [9, "×", 6], [8, "×", 9]],
-    [[6, "×", 7], [72, "-", 35], [48, "+", 37]],
-    [[9, "×", 9], [83, "-", 47], [8, "×", 7]],
-    [[56, "+", 68], [91, "-", 46], [7, "×", 9]],
-    [[8, "×", 8], [125, "-", 48], [6, "×", 9]],
+    [[1, "+", 2], [2, "+", 2], [3, "+", 1]],     // 1  plus op til 5
+    [[4, "+", 3], [5, "+", 2], [6, "+", 1]],     // 2  plus op til 10
+    [[3, "+", 4], [5, "+", 5], [2, "+", 6]],     // 3  plus op til 10
+    [[4, "-", 1], [5, "-", 2], [3, "-", 2]],     // 4  minus op til 5
+    [[7, "-", 3], [8, "-", 2], [9, "-", 4]],     // 5  minus op til 10
+    [[6, "+", 3], [9, "-", 5], [4, "+", 4]],     // 6  plus og minus op til 10
+    [[7, "+", 3], [6, "+", 4], [8, "+", 2]],     // 7  tiervenner
+    [[10, "+", 3], [10, "+", 6], [12, "+", 4]],  // 8  plus op til 20
+    [[8, "+", 5], [7, "+", 6], [9, "+", 4]],     // 9  plus over 10
+    [[15, "-", 3], [17, "-", 5], [19, "-", 6]],  // 10 minus op til 20
+    [[13, "-", 5], [12, "-", 4], [14, "-", 6]],  // 11 minus over 10
+    [[6, "+", 6], [7, "+", 7], [8, "+", 8]],     // 12 dobbelt-op
+    [[20, "+", 10], [30, "+", 20], [50, "-", 20]], // 13 hele tiere
+    [[23, "+", 4], [41, "+", 5], [32, "+", 6]],  // 14 tocifret plus
+    [[28, "-", 5], [39, "-", 7], [46, "-", 3]],  // 15 tocifret minus
+    [[24, "+", 10], [35, "+", 20], [41, "+", 30]], // 16 plus hele tiere
+    [[2, "×", 2], [2, "×", 3], [2, "×", 5]],     // 17 gange med 2
+    [[10, "×", 3], [5, "×", 2], [5, "×", 4]],    // 18 gange med 10 og 5
+    [[9, "+", 7], [16, "-", 8], [2, "×", 4]],    // 19 blandet
+    [[34, "+", 12], [47, "-", 5], [5, "×", 3]],  // 20 finale
   ];
   const calc = (a, op, b) => op === "+" ? a + b : op === "-" ? a - b : a * b;
   const sym = op => op === "-" ? "−" : op;
   const ptext = p => `${p.a} ${sym(p.op)} ${p.b}`;
-  const NEW_OP = { 7: "Nu kommer minus! Når man trækker fra, bliver tallet mindre.", 11: "Nu kommer gange! 2 × 3 betyder 2 + 2 + 2.", 17: "Nu blander vi plus, minus og gange. Kig godt på tegnet!" };
+  const NEW_OP = {
+    4: "Nu kommer minus! Når man trækker fra, bliver tallet mindre.",
+    7: "Tiervenner! To tal, der tilsammen giver 10.",
+    9: "Nu går vi over 10. Tip: lav 10 først, og læg resten til.",
+    12: "Dobbelt-op! Læg det samme tal sammen to gange.",
+    13: "Hele tiere! Tæl i tiere: 10, 20, 30 ...",
+    14: "Store tal! Læg enerne sammen, tierne bliver der.",
+    17: "Nu kommer gange! 2 × 3 betyder 2 + 2 + 2.",
+    19: "Nu blander vi plus, minus og gange. Kig godt på tegnet!",
+  };
 
   let level = 1, probs = [], pi = 0, prob = null, solved = [];
   let pegs = [], shot = null, fallers = [], streak = 0, mistakes = 0, score = 0;
@@ -308,9 +318,9 @@ canvas#c { width: 100%; height: 100%; display: block; border-radius: 20px; touch
   function say(text, dur = 4.5) { speech = { text, t: dur }; }
   function mood(m, t = 1.2) { owl.mood = m; owl.moodT = t; if (m === "happy") owl.hop = 1; }
   function hint(p) {
-    if (p.op === "+") return p.b <= 10 ? `Start ved ${p.a} og tæl ${p.b} frem.` : `Læg tierne sammen først, og så enerne.`;
-    if (p.op === "-") return p.b <= 10 ? `Start ved ${p.a} og tæl ${p.b} tilbage.` : `Træk tierne fra først, og så enerne.`;
-    return `${p.a} × ${p.b} er ${p.b} grupper med ${p.a} i hver. Tæl ${p.a} frem ${p.b} gange.`;
+    if (p.op === "+") return p.b % 10 === 0 && p.b > 0 ? `Tæl ${p.b / 10} tier${p.b > 10 ? "e" : ""} frem fra ${p.a}.` : `Start ved ${p.a} og tæl ${p.b} frem på fingrene.`;
+    if (p.op === "-") return p.b % 10 === 0 && p.b > 0 ? `Tæl ${p.b / 10} tier${p.b > 10 ? "e" : ""} tilbage fra ${p.a}.` : `Start ved ${p.a} og tæl ${p.b} tilbage på fingrene.`;
+    return `${p.a} × ${p.b} er ${p.a} lagt sammen ${p.b} gange: ${Array(p.b).fill(p.a).join(" + ")}.`;
   }
 
   // ---------- levels & problems ----------
