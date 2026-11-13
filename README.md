@@ -7,7 +7,7 @@ Et lærerigt sigte-og-skyd-spil i en eventyrskov med 20 levels i plus, minus og 
 ## Sådan spiller man
 - Hvert level har 3 regnestykker. De kommer ét ad gangen i tilfældig rækkefølge.
 - Til hvert regnestykke er der 5 svarkugler, der kører frem og tilbage og hopper på væggene og på hinanden. Sigt med musen (eller piletasterne), og klik for at skyde kuglen med det rigtige svar. Kuglerne bliver hurtigere i de højere levels. Skyder du forbi, sker der ikke noget.
-- **Forhindringer:** Fra level 3 er der buske, koralsten, candyfloss-skyer eller asteroider (alt efter verden) ude på banen. Svarkuglerne kan gemme sig bag dem, og din kugle hopper af dem.
+- **Hylder:** Fra level 3 hænger der hylder over banerne (en træstamme, en koralhylde, en chokoladebar eller en rumbjælke alt efter verden). Svarkuglerne kører ind under dem, og din kugle hopper af dem, så skyd via væggen for at ramme en kugle under en hylde.
 - **Bandeskud:** Sigtelinjen viser, hvor kuglen rammer en væg eller forhindring, og hvilken vej den hopper. Hopper kuglen, før den rammer det rigtige svar, får du 25 bonuspoint per hop.
 - Tre forkerte svar, og du starter levelet forfra. Du får 1–3 stjerner pr. level.
 - Uglen **Professor Hu** giver tips. To rigtige svar fylder uglens månekugle, og så kan du klikke på uglen eller UGLESYN-måleren. Uglen skyder månestråler, der fjerner to forkerte svar. Har du kun ét liv tilbage, hjælper uglen af sig selv.
